@@ -16,7 +16,15 @@ CORS(app)
 env = os.environ.get("FLASK_ENV", "development")
 app.config.from_object(config[env])
 
+# Fail fast with a clear message if DATABASE_URL is missing in production
+if env == "production" and not app.config.get("SQLALCHEMY_DATABASE_URI"):
+    raise RuntimeError("DATABASE_URL environment variable is not set")
+
 db = SQLAlchemy(app)
+
+# Create tables on startup (works with both `python app.py` and gunicorn)
+with app.app_context():
+    db.create_all()
 
 
 # ---------------------------------------------------------------------------
@@ -415,7 +423,5 @@ def handle_error(e):
 
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
     port = int(os.environ.get("PORT", 5001))
     app.run(host="0.0.0.0", port=port)
