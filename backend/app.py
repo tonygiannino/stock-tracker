@@ -6,7 +6,7 @@ import numpy as np
 import yfinance as yf
 from datetime import datetime, timezone
 from dotenv import load_dotenv
-from config import config
+from config import config, get_db_url
 
 load_dotenv()
 
@@ -16,9 +16,9 @@ CORS(app)
 env = os.environ.get("FLASK_ENV", "development")
 app.config.from_object(config[env])
 
-# Fail fast with a clear message if DATABASE_URL is missing in production
-if env == "production" and not app.config.get("SQLALCHEMY_DATABASE_URI"):
-    raise RuntimeError("DATABASE_URL environment variable is not set")
+# Always resolve DATABASE_URL here, after load_dotenv(), regardless of FLASK_ENV
+app.config["SQLALCHEMY_DATABASE_URI"] = get_db_url()
+print(f"[startup] env={env}  db={app.config['SQLALCHEMY_DATABASE_URI'][:40]}...")
 
 db = SQLAlchemy(app)
 

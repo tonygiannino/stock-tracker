@@ -8,6 +8,12 @@ def _fix_db_url(url):
     return url
 
 
+def get_db_url():
+    """Always prefer DATABASE_URL from the environment, fall back to local dev."""
+    url = os.environ.get("DATABASE_URL", "postgresql://localhost/stocks")
+    return _fix_db_url(url)
+
+
 class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.environ.get("SECRET_KEY", "change-me-in-production")
@@ -15,14 +21,10 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = _fix_db_url(
-        os.environ.get("DATABASE_URL", "postgresql://localhost/stocks")
-    )
 
 
 class ProductionConfig(Config):
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = _fix_db_url(os.environ.get("DATABASE_URL"))
 
 
 config = {
