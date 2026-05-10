@@ -1,0 +1,54 @@
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 0;
+}
+
+/* Inner wrapper uses the shared layout-inner class from index.css */
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  letter-spacing: -.01em;
+}
+
+.links {
+  display: flex;
+  gap: .25rem;
+}
+
+.link, .active {
+  padding: .4rem .85rem;
+  border-radius: 6px;
+  font-size: .9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background .15s, color .15s;
+}
+
+.link {
+  color: #6b7280;
+}
+
+.link:hover {
+  background: #f3f4f6;
+  color: #1a1a2e;
+}
+
+.active {
+  background: #e0e7ff;
+  color: #4338ca;
+}

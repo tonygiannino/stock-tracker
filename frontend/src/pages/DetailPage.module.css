@@ -1,0 +1,124 @@
+.page {
+  max-width: 700px;
+}
+
+.back {
+  background: none;
+  border: none;
+  color: #6366f1;
+  font-size: .9rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 1.5rem;
+}
+
+.back:hover {
+  text-decoration: underline;
+}
+
+.hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.ticker {
+  display: inline-block;
+  background: #e0e7ff;
+  color: #4338ca;
+  font-size: .85rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  padding: .2rem .6rem;
+  border-radius: 5px;
+  margin-bottom: .5rem;
+}
+
+.company {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.editBtn {
+  background: #6366f1;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: .5rem 1.25rem;
+  font-size: .9rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s;
+}
+
+.editBtn:hover {
+  background: #4f46e5;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.label {
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #9ca3af;
+}
+
+.value {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #1a1a2e;
+}
+
+.empty {
+  font-size: 1.1rem;
+  color: #d1d5db;
+}
+
+.link {
+  font-size: 1rem;
+  color: #6366f1;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.loading {
+  color: #9ca3af;
+  padding: 2rem 0;
+}
+
+.error {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: 8px;
+  padding: .75rem 1rem;
+  font-size: .9rem;
+}

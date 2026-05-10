@@ -1,0 +1,66 @@
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .75rem 1rem;
+  border-top: 1px solid #f3f4f6;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.pageInfo {
+  font-size: .85rem;
+  color: #6b7280;
+  min-width: 80px;
+}
+
+.pageControls {
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+}
+
+.pageControls button {
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 5px;
+  width: 2rem;
+  height: 2rem;
+  font-size: .9rem;
+  cursor: pointer;
+  color: #374151;
+  transition: background .15s;
+}
+
+.pageControls button:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.pageControls button:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+.pageNum {
+  font-size: .85rem;
+  color: #6b7280;
+  padding: 0 .5rem;
+  white-space: nowrap;
+}
+
+.pageSize label {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .85rem;
+  color: #6b7280;
+}
+
+.pageSize select {
+  border: 1px solid #e5e7eb;
+  border-radius: 5px;
+  padding: .2rem .4rem;
+  font-size: .85rem;
+  color: #374151;
+  cursor: pointer;
+}

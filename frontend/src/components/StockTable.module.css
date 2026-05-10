@@ -1,0 +1,164 @@
+.wrapper {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .9rem;
+}
+
+.table thead {
+  background: #f8fafc;
+}
+
+.table th {
+  text-align: left;
+  padding: .75rem 1rem;
+  font-size: .8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.sortable:hover {
+  color: #4338ca;
+  background: #f1f5f9;
+}
+
+.table th[aria-sort="asc"],
+.table th[aria-sort="desc"] {
+  color: #4338ca;
+}
+
+.arrow {
+  font-size: .7rem;
+  opacity: .5;
+}
+
+.table th[aria-sort="asc"] .arrow,
+.table th[aria-sort="desc"] .arrow {
+  opacity: 1;
+}
+
+.table td {
+  padding: .75rem 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: #fafafa;
+}
+
+.id {
+  font-size: .8rem;
+  color: #9ca3af;
+  font-variant-numeric: tabular-nums;
+}
+
+.ticker {
+  font-weight: 700;
+  color: #6366f1;
+  font-size: .95rem;
+  width: 90px;
+  white-space: nowrap;
+}
+
+.tickerLink {
+  background: none;
+  border: none;
+  color: #6366f1;
+  font-weight: 700;
+  font-size: .95rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+}
+
+.tickerLink:hover {
+  text-decoration: underline;
+}
+
+.link {
+  color: #6366f1;
+  text-decoration: none;
+  font-size: .85rem;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.na {
+  color: #d1d5db;
+}
+
+.actions {
+  display: flex;
+  gap: .4rem;
+  justify-content: flex-end;
+  width: 1%;
+  white-space: nowrap;
+}
+
+.edit, .delete {
+  border: none;
+  border-radius: 5px;
+  padding: .3rem .7rem;
+  font-size: .8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.edit {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.edit:hover {
+  background: #c7d2fe;
+}
+
+.delete {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.delete:hover {
+  background: #fecaca;
+}
+
+.empty {
+  text-align: center;
+  color: #9ca3af;
+  padding: 3rem;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .table th,
+  .table td {
+    padding: .6rem .65rem;
+    font-size: .8rem;
+  }
+}
