@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import StockForm from "../components/StockForm";
 import styles from "./EditPage.module.css";
+import { apiUrl } from "../lib/api";
 
 export default function EditPage() {
   const { ticker } = useParams();
@@ -13,7 +14,7 @@ export default function EditPage() {
   useEffect(() => {
     async function fetchStock() {
       try {
-        const res = await fetch(`/api/stocks/${ticker}`);
+        const res = await fetch(apiUrl(`/api/stocks/${ticker}`));
         if (!res.ok) throw new Error(`Stock not found (${res.status})`);
         setStock(await res.json());
       } catch (err) {

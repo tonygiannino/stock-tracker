@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import styles from "./StockForm.module.css";
+import { apiUrl } from "../lib/api";
 
 const EMPTY = { ticker: "", company: "", sector: "", industry: "", website: "" };
 
@@ -23,8 +24,8 @@ export default function StockForm({ editing, onSave, onCancel }) {
     setSaving(true);
     try {
       const url = editing
-        ? `/api/stocks/${editing.ticker}`
-        : "/api/stocks";
+        ? apiUrl(`/api/stocks/${editing.ticker}`)
+        : apiUrl("/api/stocks");
       const method = editing ? "PUT" : "POST";
       const res = await fetch(url, {
         method,

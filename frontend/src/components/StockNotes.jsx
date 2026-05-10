@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import styles from "./StockNotes.module.css";
+import { apiUrl } from "../lib/api";
 
 function formatDate(iso) {
   const d = new Date(iso);
@@ -23,7 +24,7 @@ export default function StockNotes({ ticker }) {
   useEffect(() => {
     if (!ticker) return;
     setLoading(true);
-    fetch(`/api/stocks/${ticker}/notes`)
+    fetch(apiUrl(`/api/stocks/${ticker}/notes`))
       .then((r) => r.json())
       .then((data) => setNotes(data))
       .catch(() => setError("Failed to load notes."))
@@ -37,7 +38,7 @@ export default function StockNotes({ ticker }) {
     setSaving(true);
     setError("");
     try {
-      const res = await fetch(`/api/stocks/${ticker}/notes`, {
+      const res = await fetch(apiUrl(`/api/stocks/${ticker}/notes`), {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({ content }),
@@ -56,7 +57,7 @@ export default function StockNotes({ ticker }) {
 
   async function handleDelete(id) {
     try {
-      const res = await fetch(`/api/stocks/${ticker}/notes/${id}`, { method: "DELETE" });
+      const res = await fetch(apiUrl(`/api/stocks/${ticker}/notes/${id}`), { method: "DELETE" });
       if (!res.ok) throw new Error();
       setNotes((prev) => prev.filter((n) => n.id !== id));
     } catch {

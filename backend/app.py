@@ -6,16 +6,15 @@ import numpy as np
 import yfinance as yf
 from datetime import datetime, timezone
 from dotenv import load_dotenv
+from config import config
 
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
-    "DATABASE_URL", "postgresql://localhost/stocks"
-)
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+env = os.environ.get("FLASK_ENV", "development")
+app.config.from_object(config[env])
 
 db = SQLAlchemy(app)
 
@@ -418,4 +417,5 @@ def handle_error(e):
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(debug=True, port=5001)
+    port = int(os.environ.get("PORT", 5001))
+    app.run(host="0.0.0.0", port=port)

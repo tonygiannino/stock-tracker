@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import styles from "./DetailPage.module.css";
 import StockNotes from "../components/StockNotes";
+import { apiUrl } from "../lib/api";
 
 export default function DetailPage() {
   const { ticker } = useParams();
@@ -13,7 +14,7 @@ export default function DetailPage() {
   useEffect(() => {
     async function fetchStock() {
       try {
-        const res = await fetch(`/api/stocks/${ticker}`);
+        const res = await fetch(apiUrl(`/api/stocks/${ticker}`));
         if (!res.ok) throw new Error(`Stock not found (${res.status})`);
         setStock(await res.json());
       } catch (err) {

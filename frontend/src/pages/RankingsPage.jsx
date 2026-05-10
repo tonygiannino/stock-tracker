@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./RankingsPage.module.css";
 import Pagination from "../components/Pagination";
+import { apiUrl } from "../lib/api";
 
 // ---------------------------------------------------------------------------
 // Factor definitions
@@ -220,7 +221,7 @@ export default function RankingsPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/factors");
+      const res = await fetch(apiUrl("/api/factors"));
       if (!res.ok) throw new Error("Failed to load factor data");
       const data = await res.json();
       setStocks(data);
@@ -237,7 +238,7 @@ export default function RankingsPage() {
     setRefreshing(true);
     setError("");
     try {
-      const res = await fetch("/api/factors/refresh", { method: "POST" });
+      const res = await fetch(apiUrl("/api/factors/refresh"), { method: "POST" });
       const data = await res.json();
       if (data.errors?.length) console.warn("Some tickers failed:", data.errors);
       await fetchFactors();
