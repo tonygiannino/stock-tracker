@@ -78,7 +78,7 @@ export default function StockTable({ stocks, onEdit, onDelete }) {
                   {s.ticker}
                 </button>
               </td>
-              <td>{s.company}</td>
+              <td className={styles.company}>{s.company}</td>
               <td>{s.sector || <span className={styles.na}>—</span>}</td>
               <td>{s.industry || <span className={styles.na}>—</span>}</td>
               <td className={styles.actions}>

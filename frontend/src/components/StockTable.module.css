@@ -80,6 +80,10 @@
   white-space: nowrap;
 }
 
+.company {
+  width: 100%;
+}
+
 .tickerLink {
   background: none;
   border: none;
@@ -110,11 +114,13 @@
 }
 
 .actions {
-  display: flex;
-  gap: .4rem;
-  justify-content: flex-end;
-  width: 1%;
+  text-align: right;
   white-space: nowrap;
+  width: 1%;
+}
+
+.actions button + button {
+  margin-left: .4rem;
 }
 
 .edit, .delete {
