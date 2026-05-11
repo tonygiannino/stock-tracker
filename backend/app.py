@@ -9,7 +9,6 @@ from datetime import datetime, timezone
 from dotenv import load_dotenv
 from config import config, get_db_url
 import jwt
-import requests as http_requests
 
 load_dotenv()
 
@@ -33,37 +32,18 @@ db = SQLAlchemy(app)
 # Clerk JWT auth
 # ---------------------------------------------------------------------------
 
-_jwks_cache = None
-
-def _get_jwks():
-    global _jwks_cache
-    if _jwks_cache is None:
-        jwks_url = os.environ.get("CLERK_JWKS_URL")
-        if not jwks_url:
-            raise RuntimeError("CLERK_JWKS_URL env var is not set")
-        resp = http_requests.get(jwks_url, timeout=10)
-        resp.raise_for_status()
-        _jwks_cache = resp.json()
-    return _jwks_cache
-
-
 def _verify_clerk_token(token):
-    """Decode and verify a Clerk JWT. Returns the payload or raises."""
-    jwks = _get_jwks()
-    header = jwt.get_unverified_header(token)
-    kid = header.get("kid")
-
-    # Find the matching key
-    key_data = next((k for k in jwks.get("keys", []) if k.get("kid") == kid), None)
-    if key_data is None:
-        raise jwt.InvalidTokenError("No matching JWKS key found")
-
-    public_key = jwt.algorithms.RSAAlgorithm.from_jwk(key_data)
+    """Decode and verify a Clerk JWT using the PEM public key."""
+    pem = os.environ.get("CLERK_JWT_PUBLIC_KEY")
+    if not pem:
+        raise RuntimeError("CLERK_JWT_PUBLIC_KEY env var is not set")
+    # Env vars can't contain literal newlines easily, so allow \n as escape
+    pem = pem.replace("\\n", "\n")
     return jwt.decode(
         token,
-        public_key,
+        pem,
         algorithms=["RS256"],
-        options={"verify_aud": False},  # Clerk tokens don't always include 'aud'
+        options={"verify_aud": False},
     )
 
 
