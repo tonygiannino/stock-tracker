@@ -1,6 +1,6 @@
 :3000
 
-root * dist
+root * frontend/dist
 file_server
 
 try_files {path} /index.html
