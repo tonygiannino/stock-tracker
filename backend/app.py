@@ -25,10 +25,6 @@ print(f"[startup] env={env}  db={app.config['SQLALCHEMY_DATABASE_URI'][:40]}..."
 
 db = SQLAlchemy(app)
 
-# Create tables on startup (works with both `python app.py` and gunicorn)
-with app.app_context():
-    db.create_all()
-
 
 # ---------------------------------------------------------------------------
 # Models
@@ -118,6 +114,11 @@ class StockNote(db.Model):
             "content":    self.content,
             "created_at": self.created_at.isoformat(),
         }
+
+
+# Create all tables now that models are defined
+with app.app_context():
+    db.create_all()
 
 
 # ---------------------------------------------------------------------------
