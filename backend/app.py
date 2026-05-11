@@ -37,8 +37,22 @@ def _verify_clerk_token(token):
     pem = os.environ.get("CLERK_JWT_PUBLIC_KEY")
     if not pem:
         raise RuntimeError("CLERK_JWT_PUBLIC_KEY env var is not set")
-    # Env vars can't contain literal newlines easily, so allow \n as escape
+
+    # Normalize: replace literal \n with real newlines (Railway stores them escaped)
     pem = pem.replace("\\n", "\n")
+
+    # Ensure proper PEM structure with real newlines around the header/footer
+    pem = pem.replace("-----BEGIN PUBLIC KEY-----", "-----BEGIN PUBLIC KEY-----\n")
+    pem = pem.replace("-----END PUBLIC KEY-----", "\n-----END PUBLIC KEY-----")
+
+    # Collapse any double newlines introduced above
+    while "\n\n" in pem:
+        pem = pem.replace("\n\n", "\n")
+
+    pem = pem.strip()
+
+    print(f"[auth] PEM first line: {pem[:30]!r}")  # debug: log without exposing key body
+
     return jwt.decode(
         token,
         pem,
