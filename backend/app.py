@@ -11,7 +11,10 @@ from config import config, get_db_url
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+
+# Allow requests from any origin in dev; restrict to FRONTEND_URL in prod
+frontend_url = os.environ.get("FRONTEND_URL", "*")
+CORS(app, origins=frontend_url)
 
 env = os.environ.get("FLASK_ENV", "development")
 app.config.from_object(config[env])
