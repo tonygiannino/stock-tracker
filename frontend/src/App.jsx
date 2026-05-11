@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
 import NavBar from "./components/NavBar";
 import HomePage from "./pages/HomePage";
 import AddPage from "./pages/AddPage";
@@ -7,9 +8,9 @@ import DetailPage from "./pages/DetailPage";
 import RankingsPage from "./pages/RankingsPage";
 import MomentumPage from "./pages/MomentumPage";
 
-export default function App() {
+function ProtectedRoutes() {
   return (
-    <BrowserRouter>
+    <>
       <NavBar />
       <div className="layout-inner" style={{ paddingTop: "1.5rem", paddingBottom: "3rem" }}>
         <Routes>
@@ -21,6 +22,19 @@ export default function App() {
           <Route path="/momentum" element={<MomentumPage />} />
         </Routes>
       </div>
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <SignedIn>
+        <ProtectedRoutes />
+      </SignedIn>
+      <SignedOut>
+        <RedirectToSignIn />
+      </SignedOut>
     </BrowserRouter>
   );
 }

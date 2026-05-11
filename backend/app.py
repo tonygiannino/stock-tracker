@@ -1,12 +1,15 @@
 from flask import Flask, request, jsonify, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from functools import wraps
 import os
 import numpy as np
 import yfinance as yf
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 from config import config, get_db_url
+import jwt
+import requests as http_requests
 
 load_dotenv()
 
@@ -24,6 +27,60 @@ app.config["SQLALCHEMY_DATABASE_URI"] = get_db_url()
 print(f"[startup] env={env}  db={app.config['SQLALCHEMY_DATABASE_URI'][:40]}...")
 
 db = SQLAlchemy(app)
+
+
+# ---------------------------------------------------------------------------
+# Clerk JWT auth
+# ---------------------------------------------------------------------------
+
+_jwks_cache = None
+
+def _get_jwks():
+    global _jwks_cache
+    if _jwks_cache is None:
+        jwks_url = os.environ.get("CLERK_JWKS_URL")
+        if not jwks_url:
+            raise RuntimeError("CLERK_JWKS_URL env var is not set")
+        resp = http_requests.get(jwks_url, timeout=10)
+        resp.raise_for_status()
+        _jwks_cache = resp.json()
+    return _jwks_cache
+
+
+def _verify_clerk_token(token):
+    """Decode and verify a Clerk JWT. Returns the payload or raises."""
+    jwks = _get_jwks()
+    header = jwt.get_unverified_header(token)
+    kid = header.get("kid")
+
+    # Find the matching key
+    key_data = next((k for k in jwks.get("keys", []) if k.get("kid") == kid), None)
+    if key_data is None:
+        raise jwt.InvalidTokenError("No matching JWKS key found")
+
+    public_key = jwt.algorithms.RSAAlgorithm.from_jwk(key_data)
+    return jwt.decode(
+        token,
+        public_key,
+        algorithms=["RS256"],
+        options={"verify_aud": False},  # Clerk tokens don't always include 'aud'
+    )
+
+
+def require_auth(f):
+    """Decorator that requires a valid Clerk JWT in the Authorization header."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth_header = request.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            abort(401, "Missing or invalid Authorization header")
+        token = auth_header[7:]
+        try:
+            _verify_clerk_token(token)
+        except Exception as e:
+            abort(401, f"Invalid token: {e}")
+        return f(*args, **kwargs)
+    return decorated
 
 
 # ---------------------------------------------------------------------------
@@ -163,12 +220,14 @@ def fmt_safe(val):
 # ---------------------------------------------------------------------------
 
 @app.route("/api/stocks", methods=["GET"])
+@require_auth
 def get_stocks():
     stocks = Stock.query.order_by(Stock.ticker).all()
     return jsonify([s.to_dict() for s in stocks])
 
 
 @app.route("/api/stocks", methods=["POST"])
+@require_auth
 def create_stock():
     data    = request.get_json(silent=True) or {}
     ticker  = (data.get("ticker") or "").strip().upper()
@@ -189,12 +248,14 @@ def create_stock():
 
 
 @app.route("/api/stocks/<ticker>", methods=["GET"])
+@require_auth
 def get_stock(ticker):
     stock = Stock.query.get_or_404(ticker.upper())
     return jsonify(stock.to_dict())
 
 
 @app.route("/api/stocks/<ticker>", methods=["PUT"])
+@require_auth
 def update_stock(ticker):
     stock   = Stock.query.get_or_404(ticker.upper())
     data    = request.get_json(silent=True) or {}
@@ -210,6 +271,7 @@ def update_stock(ticker):
 
 
 @app.route("/api/stocks/<ticker>", methods=["DELETE"])
+@require_auth
 def delete_stock(ticker):
     stock = Stock.query.get_or_404(ticker.upper())
     db.session.delete(stock)
@@ -222,6 +284,7 @@ def delete_stock(ticker):
 # ---------------------------------------------------------------------------
 
 @app.route("/api/factors", methods=["GET"])
+@require_auth
 def get_factors():
     stocks  = {s.ticker: s for s in Stock.query.all()}
     factors = {f.ticker: f for f in StockFactor.query.all()}
@@ -242,6 +305,7 @@ def get_factors():
 
 
 @app.route("/api/factors/refresh", methods=["POST"])
+@require_auth
 def refresh_factors():
     stocks  = Stock.query.all()
     updated = []
@@ -304,6 +368,7 @@ def calc_rsi(close, period=14):
 
 
 @app.route("/api/momentum", methods=["GET"])
+@require_auth
 def get_momentum():
     stocks   = {s.ticker: s for s in Stock.query.all()}
     momentum = {m.ticker: m for m in StockMomentum.query.all()}
@@ -325,6 +390,7 @@ def get_momentum():
 
 
 @app.route("/api/momentum/refresh", methods=["POST"])
+@require_auth
 def refresh_momentum():
     stocks  = Stock.query.all()
     updated = []
@@ -385,6 +451,7 @@ def refresh_momentum():
 # ---------------------------------------------------------------------------
 
 @app.route("/api/stocks/<ticker>/notes", methods=["GET"])
+@require_auth
 def get_notes(ticker):
     Stock.query.get_or_404(ticker.upper())
     notes = (StockNote.query
@@ -395,6 +462,7 @@ def get_notes(ticker):
 
 
 @app.route("/api/stocks/<ticker>/notes", methods=["POST"])
+@require_auth
 def create_note(ticker):
     Stock.query.get_or_404(ticker.upper())
     data    = request.get_json(silent=True) or {}
@@ -408,6 +476,7 @@ def create_note(ticker):
 
 
 @app.route("/api/stocks/<ticker>/notes/<int:note_id>", methods=["DELETE"])
+@require_auth
 def delete_note(ticker, note_id):
     note = StockNote.query.filter_by(id=note_id, ticker=ticker.upper()).first_or_404()
     db.session.delete(note)
@@ -420,6 +489,7 @@ def delete_note(ticker, note_id):
 # ---------------------------------------------------------------------------
 
 @app.errorhandler(400)
+@app.errorhandler(401)
 @app.errorhandler(404)
 @app.errorhandler(409)
 def handle_error(e):

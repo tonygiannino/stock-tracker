@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { UserButton } from "@clerk/clerk-react";
 import PerseusLogo from "./PerseusLogo";
 import styles from "./NavBar.module.css";
 
@@ -20,6 +21,7 @@ export default function NavBar() {
           <NavLink to="/momentum" className={({ isActive }) => isActive ? styles.active : styles.link}>
             Momentum
           </NavLink>
+          <UserButton afterSignOutUrl="/" />
         </div>
       </div>
     </nav>

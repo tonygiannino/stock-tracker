@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import styles from "./StockForm.module.css";
-import { apiUrl } from "../lib/api";
+import { apiUrl, useAuthFetch } from "../lib/api";
 
 const EMPTY = { ticker: "", company: "", sector: "", industry: "", website: "" };
 
@@ -8,6 +8,7 @@ export default function StockForm({ editing, onSave, onCancel }) {
   const [form, setForm] = useState(EMPTY);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const authFetch = useAuthFetch();
 
   useEffect(() => {
     setForm(editing ?? EMPTY);
@@ -27,9 +28,8 @@ export default function StockForm({ editing, onSave, onCancel }) {
         ? apiUrl(`/api/stocks/${editing.ticker}`)
         : apiUrl("/api/stocks");
       const method = editing ? "PUT" : "POST";
-      const res = await fetch(url, {
+      const res = await authFetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
       if (!res.ok) {

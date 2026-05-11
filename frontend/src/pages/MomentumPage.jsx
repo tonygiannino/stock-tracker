@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./RankingsPage.module.css";
 import Pagination from "../components/Pagination";
-import { apiUrl } from "../lib/api";
+import { apiUrl, useAuthFetch } from "../lib/api";
 
 // ---------------------------------------------------------------------------
 // Momentum factor definitions
@@ -187,6 +187,7 @@ function SortTh({ col, label, title, sortCol, sortDir, onSort, className = "", s
 // ---------------------------------------------------------------------------
 export default function MomentumPage() {
   const navigate = useNavigate();
+  const authFetch = useAuthFetch();
   const [stocks, setStocks]         = useState([]);
   const [loading, setLoading]       = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -213,7 +214,7 @@ export default function MomentumPage() {
     setLoading(true);
     setError("");
     try {
-      const res  = await fetch(apiUrl("/api/momentum"));
+      const res  = await authFetch(apiUrl("/api/momentum"));
       if (!res.ok) throw new Error("Failed to load momentum data");
       const data = await res.json();
       setStocks(data);
@@ -230,7 +231,7 @@ export default function MomentumPage() {
     setRefreshing(true);
     setError("");
     try {
-      const res  = await fetch(apiUrl("/api/momentum/refresh"), { method: "POST" });
+      const res  = await authFetch(apiUrl("/api/momentum/refresh"), { method: "POST" });
       const data = await res.json();
       if (data.errors?.length) console.warn("Some tickers failed:", data.errors);
       await fetchMomentum();

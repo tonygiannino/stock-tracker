@@ -6,3 +6,5 @@ python-dotenv
 numpy>=1.26.0
 yfinance
 gunicorn
+PyJWT[crypto]
+requests

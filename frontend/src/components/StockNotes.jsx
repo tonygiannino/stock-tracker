@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import styles from "./StockNotes.module.css";
-import { apiUrl } from "../lib/api";
+import { apiUrl, useAuthFetch } from "../lib/api";
 
 function formatDate(iso) {
   const d = new Date(iso);
@@ -20,11 +20,12 @@ export default function StockNotes({ ticker }) {
   const [saving, setSaving]   = useState(false);
   const [error, setError]     = useState("");
   const textareaRef           = useRef(null);
+  const authFetch             = useAuthFetch();
 
   useEffect(() => {
     if (!ticker) return;
     setLoading(true);
-    fetch(apiUrl(`/api/stocks/${ticker}/notes`))
+    authFetch(apiUrl(`/api/stocks/${ticker}/notes`))
       .then((r) => r.json())
       .then((data) => setNotes(data))
       .catch(() => setError("Failed to load notes."))
@@ -38,10 +39,9 @@ export default function StockNotes({ ticker }) {
     setSaving(true);
     setError("");
     try {
-      const res = await fetch(apiUrl(`/api/stocks/${ticker}/notes`), {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ content }),
+      const res = await authFetch(apiUrl(`/api/stocks/${ticker}/notes`), {
+        method: "POST",
+        body:   JSON.stringify({ content }),
       });
       if (!res.ok) throw new Error("Failed to save note");
       const note = await res.json();
@@ -57,7 +57,7 @@ export default function StockNotes({ ticker }) {
 
   async function handleDelete(id) {
     try {
-      const res = await fetch(apiUrl(`/api/stocks/${ticker}/notes/${id}`), { method: "DELETE" });
+      const res = await authFetch(apiUrl(`/api/stocks/${ticker}/notes/${id}`), { method: "DELETE" });
       if (!res.ok) throw new Error();
       setNotes((prev) => prev.filter((n) => n.id !== id));
     } catch {

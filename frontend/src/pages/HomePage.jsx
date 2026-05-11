@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import StockTable from "../components/StockTable";
 import styles from "./HomePage.module.css";
-import { apiUrl } from "../lib/api";
+import { apiUrl, useAuthFetch } from "../lib/api";
 
 export default function HomePage() {
   const [stocks, setStocks] = useState([]);
@@ -10,10 +10,11 @@ export default function HomePage() {
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
+  const authFetch = useAuthFetch();
 
   const fetchStocks = useCallback(async () => {
     try {
-      const res = await fetch(apiUrl("/api/stocks"));
+      const res = await authFetch(apiUrl("/api/stocks"));
       if (!res.ok) throw new Error(`Failed to load stocks (${res.status})`);
       setStocks(await res.json());
     } catch (err) {
@@ -21,13 +22,13 @@ export default function HomePage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [authFetch]);
 
   useEffect(() => { fetchStocks(); }, [fetchStocks]);
 
   async function handleDelete(ticker) {
     if (!confirm(`Delete ${ticker}?`)) return;
-    const res = await fetch(apiUrl(`/api/stocks/${ticker}`), { method: "DELETE" });
+    const res = await authFetch(apiUrl(`/api/stocks/${ticker}`), { method: "DELETE" });
     if (res.ok) setStocks((prev) => prev.filter((s) => s.ticker !== ticker));
   }
 
