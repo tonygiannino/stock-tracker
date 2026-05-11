@@ -9,9 +9,4 @@ export default defineConfig({
       "/api": "http://localhost:5001",
     },
   },
-  preview: {
-    // Production: bind to Railway's PORT and all interfaces
-    port: parseInt(process.env.PORT) || 4173,
-    host: true,
-  },
 });
