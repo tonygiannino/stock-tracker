@@ -67,11 +67,13 @@ def require_auth(f):
     def decorated(*args, **kwargs):
         auth_header = request.headers.get("Authorization", "")
         if not auth_header.startswith("Bearer "):
+            print(f"[auth] FAIL - no Bearer token. Auth header: {auth_header!r:.80}")
             abort(401, "Missing or invalid Authorization header")
         token = auth_header[7:]
         try:
             _verify_clerk_token(token)
         except Exception as e:
+            print(f"[auth] FAIL - token rejected: {e}")
             abort(401, f"Invalid token: {e}")
         return f(*args, **kwargs)
     return decorated
