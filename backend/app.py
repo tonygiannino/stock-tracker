@@ -524,10 +524,10 @@ def _fetch_sahm(fred_key):
 
 
 def _fetch_unemp(fred_key):
-    # Request extra buffer — UNRATE lags ~1 month so recent values may be missing
-    obs = _fred_observations("UNRATE", fred_key, limit=7)
+    # Large buffer — UNRATE can lag 1-2 months with "." placeholders
+    obs = _fred_observations("UNRATE", fred_key, limit=15)
     if len(obs) < 4:
-        raise ValueError(f"Only {len(obs)} valid UNRATE observations returned")
+        raise ValueError(f"Only {len(obs)} valid UNRATE observations (need 4)")
     return "unempDelta", round(float(obs[0]["value"]) - float(obs[3]["value"]), 2)
 
 
