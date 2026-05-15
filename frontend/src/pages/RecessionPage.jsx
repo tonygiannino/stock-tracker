@@ -285,9 +285,10 @@ export default function RecessionPage() {
           .map(k => LABELS[k]);
         const ts = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
         const suffix = json.cached ? "CACHED" : ts;
-        const failed = (json.errors ?? []).map(e => e.field.replace("_fetch_", "").toUpperCase());
-        const failStr = failed.length ? `  ✗ ${failed.join(", ")}` : "";
-        setFetchStatus({ ok: true, msg: `${parts.join(" · ")} — ${suffix}${failStr}` });
+        const failStr = (json.errors ?? [])
+          .map(e => `✗ ${e.field.replace("_fetch_", "").toUpperCase()}: ${e.error}`)
+          .join("  ");
+        setFetchStatus({ ok: !failStr, msg: `${parts.join(" · ")} — ${suffix}  ${failStr}`.trim() });
       }
     } catch (err) {
       setFetchStatus({ ok: false, msg: String(err) });
