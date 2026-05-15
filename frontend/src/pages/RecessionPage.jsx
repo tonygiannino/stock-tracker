@@ -197,9 +197,10 @@ function IndicatorRow({ name, peakLag, signal }) {
           <span style={{ fontSize:10, color:col, fontWeight:700 }}>{(signal*100).toFixed(0)}%</span>
         </div>
       </div>
-      <div style={{ height:4, background:C.dim, borderRadius:2 }}>
-        <div style={{ height:"100%", width:`${signal*100}%`, background:col, borderRadius:2,
-          boxShadow:`0 0 6px ${col}88`, transition:"width 0.3s ease, background 0.3s ease" }}/>
+      <div style={{ height:4, background:"#1e3550", borderRadius:2 }}>
+        <div style={{ height:"100%", width:`${Math.max(signal*100, signal > 0 ? 2 : 0)}%`,
+          background:col, borderRadius:2, boxShadow:`0 0 6px ${col}88`,
+          transition:"width 0.3s ease, background 0.3s ease" }}/>
       </div>
     </div>
   );
