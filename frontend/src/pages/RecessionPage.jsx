@@ -262,13 +262,13 @@ export default function RecessionPage() {
   const authFetch = useAuthFetch();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { handleLoadCurrent(); }, []);
+  useEffect(() => { handleLoadCurrent(false); }, []);
 
-  async function handleLoadCurrent() {
+  async function handleLoadCurrent(force = true) {
     setFetching(true);
     setFetchStatus(null);
     try {
-      const res  = await authFetch(apiUrl("/api/macro"));
+      const res  = await authFetch(apiUrl(`/api/macro${force ? "?force=true" : ""}`));
       const json = await res.json();
       const d = json.data ?? {};
       if (d.spread      !== undefined) setSpread(d.spread);

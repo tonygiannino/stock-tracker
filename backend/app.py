@@ -541,8 +541,9 @@ def _fetch_gdp(fred_key):
 @app.route("/api/macro", methods=["GET"])
 @require_auth
 def get_macro():
-    """Fetch live macro indicators; results cached for 15 minutes."""
-    if time.time() - _macro_cache["ts"] < _MACRO_CACHE_TTL:
+    """Fetch live macro indicators; results cached for 15 minutes unless force=true."""
+    force = request.args.get("force") == "true"
+    if not force and time.time() - _macro_cache["ts"] < _MACRO_CACHE_TTL:
         return jsonify({"data": _macro_cache["data"], "errors": _macro_cache["errors"], "cached": True})
 
     fred_key = os.environ.get("FRED_API_KEY")
