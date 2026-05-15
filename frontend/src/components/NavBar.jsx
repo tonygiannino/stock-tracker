@@ -21,6 +21,9 @@ export default function NavBar() {
           <NavLink to="/momentum" className={({ isActive }) => isActive ? styles.active : styles.link}>
             Momentum
           </NavLink>
+          <NavLink to="/recession" className={({ isActive }) => isActive ? styles.active : styles.link}>
+            Recession
+          </NavLink>
           <UserButton afterSignOutUrl="/" />
         </div>
       </div>

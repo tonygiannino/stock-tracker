@@ -7,6 +7,7 @@ import EditPage from "./pages/EditPage";
 import DetailPage from "./pages/DetailPage";
 import RankingsPage from "./pages/RankingsPage";
 import MomentumPage from "./pages/MomentumPage";
+import RecessionPage from "./pages/RecessionPage";
 
 function ProtectedRoutes() {
   return (
@@ -20,6 +21,7 @@ function ProtectedRoutes() {
           <Route path="/stocks/:ticker/edit" element={<EditPage />} />
           <Route path="/rankings" element={<RankingsPage />} />
           <Route path="/momentum" element={<MomentumPage />} />
+          <Route path="/recession" element={<RecessionPage />} />
         </Routes>
       </div>
     </>

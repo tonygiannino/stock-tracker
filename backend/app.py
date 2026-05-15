@@ -3,6 +3,10 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from functools import wraps
 import os
+import json as json_lib
+import urllib.request
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import numpy as np
 import yfinance as yf
 from datetime import datetime, timezone
@@ -474,6 +478,99 @@ def delete_note(ticker, note_id):
     db.session.delete(note)
     db.session.commit()
     return "", 204
+
+
+# ---------------------------------------------------------------------------
+# Macro routes
+# ---------------------------------------------------------------------------
+
+_macro_cache = {"data": None, "errors": None, "ts": 0}
+_MACRO_CACHE_TTL = 900  # 15 minutes
+
+
+def _fred_observations(series_id, api_key, limit=1):
+    """Return the most recent non-missing FRED observations for a series."""
+    url = (
+        f"https://api.stlouisfed.org/fred/series/observations"
+        f"?series_id={series_id}&api_key={api_key}&file_type=json"
+        f"&sort_order=desc&limit={limit}"
+    )
+    with urllib.request.urlopen(url, timeout=10) as resp:
+        data = json_lib.loads(resp.read())
+    return [o for o in data["observations"] if o["value"] != "."]
+
+
+def _fetch_spread(_):
+    t10y = yf.Ticker("^TNX").history(period="5d")["Close"]
+    t3m  = yf.Ticker("^IRX").history(period="5d")["Close"]
+    if t10y.empty or t3m.empty:
+        raise ValueError("Empty price history")
+    return "spread", round(float(t10y.iloc[-1]) - float(t3m.iloc[-1]), 2)
+
+
+def _fetch_oil(_):
+    oil = yf.Ticker("CL=F").history(period="13mo")["Close"]
+    if len(oil) < 20:
+        raise ValueError("Insufficient oil price history")
+    year_ago = float(oil.iloc[-252]) if len(oil) >= 252 else float(oil.iloc[0])
+    return "oilYoY", round((float(oil.iloc[-1]) / year_ago - 1) * 100, 1)
+
+
+def _fetch_sahm(fred_key):
+    obs = _fred_observations("SAHMREALTIME", fred_key, limit=3)
+    if not obs:
+        raise ValueError("No valid SAHMREALTIME observations")
+    return "sahm", round(float(obs[0]["value"]), 2)
+
+
+def _fetch_unemp(fred_key):
+    # Request extra buffer — UNRATE lags ~1 month so recent values may be missing
+    obs = _fred_observations("UNRATE", fred_key, limit=7)
+    if len(obs) < 4:
+        raise ValueError(f"Only {len(obs)} valid UNRATE observations returned")
+    return "unempDelta", round(float(obs[0]["value"]) - float(obs[3]["value"]), 2)
+
+
+def _fetch_gdp(fred_key):
+    obs = _fred_observations("A191RL1Q225SBEA", fred_key, limit=3)
+    if not obs:
+        raise ValueError("No valid GDP observations")
+    return "gdpGrowth", round(float(obs[0]["value"]), 1)
+
+
+@app.route("/api/macro", methods=["GET"])
+@require_auth
+def get_macro():
+    """Fetch live macro indicators; results cached for 15 minutes."""
+    if time.time() - _macro_cache["ts"] < _MACRO_CACHE_TTL:
+        return jsonify({"data": _macro_cache["data"], "errors": _macro_cache["errors"], "cached": True})
+
+    fred_key = os.environ.get("FRED_API_KEY")
+    tasks = [
+        (_fetch_spread, None),
+        (_fetch_oil,    None),
+    ]
+    if fred_key:
+        tasks += [
+            (_fetch_sahm,  fred_key),
+            (_fetch_unemp, fred_key),
+            (_fetch_gdp,   fred_key),
+        ]
+
+    result, errors = {}, []
+    with ThreadPoolExecutor(max_workers=len(tasks)) as pool:
+        futures = {pool.submit(fn, arg): fn.__name__ for fn, arg in tasks}
+        for future in as_completed(futures):
+            try:
+                field, value = future.result()
+                result[field] = value
+            except Exception as e:
+                errors.append({"field": futures[future], "error": str(e)})
+
+    _macro_cache["data"]   = result
+    _macro_cache["errors"] = errors
+    _macro_cache["ts"]     = time.time()
+    return jsonify({"data": result, "errors": errors, "cached": False})
 
 
 # ---------------------------------------------------------------------------
